@@ -30,7 +30,7 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-body tracking-widest uppercase text-foreground mb-4">{t.footer.connect}</h4>
             <div className="flex gap-4">
-              {["Instagram", "LinkedIn", "X"].map((social) => (
+              {["Instagram"].map((social) => (
                 <a key={social} href="#" className="text-sm text-muted-foreground hover:text-gold transition-colors">
                   {social}
                 </a>
