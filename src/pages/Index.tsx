@@ -29,16 +29,16 @@ const Index = () => {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <img src={heroBg} alt="Luxury black car on Mexico City streets at night" width={1920} height={1080} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
         </div>
 
-        <div className="relative z-10 container mx-auto px-6 lg:px-12 text-center max-w-4xl">
+        <div className="relative z-10 container mx-auto px-6 lg:px-12 text-center max-w-4xl hero-text-shadow">
           <p className="text-sm font-body tracking-[0.3em] uppercase text-gold mb-6 opacity-0 animate-fade-in" style={{ animationDelay: "0.2s" }}>
             {t.hero.tagline}
           </p>
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl leading-tight text-foreground mb-6 opacity-0 animate-fade-in" style={{ animationDelay: "0.5s" }}>
+          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl leading-tight text-white font-bold mb-6 opacity-0 animate-fade-in" style={{ animationDelay: "0.5s" }}>
             {t.hero.title}{" "}
-            <span className="gold-text-gradient italic">{t.hero.titleHighlight}</span>
+            <span className="gold-text-gradient italic font-bold">{t.hero.titleHighlight}</span>
           </h1>
           <p className="font-body text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed opacity-0 animate-fade-in" style={{ animationDelay: "0.8s" }}>
             {t.hero.subtitle}
