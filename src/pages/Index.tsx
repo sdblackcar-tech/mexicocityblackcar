@@ -101,6 +101,7 @@ const Index = () => {
         </div>
       </section>
 
+      <BlogSection />
       <TrustBar />
       <Footer />
     </div>
