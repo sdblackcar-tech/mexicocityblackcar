@@ -2,6 +2,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 import Navbar from "@/components/Navbar";
 import TrustBar from "@/components/TrustBar";
 import Footer from "@/components/Footer";
+import BlogSection from "@/components/BlogSection";
 import { MessageCircle, Mic, CalendarCheck, BookOpen } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 
