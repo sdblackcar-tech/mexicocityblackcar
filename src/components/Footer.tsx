@@ -38,7 +38,6 @@ const Footer = () => {
               >
                 Instagram
               </a>
-              ))}
             </div>
           </div>
         </div>
