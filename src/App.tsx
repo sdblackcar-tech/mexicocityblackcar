@@ -10,6 +10,7 @@ import About from "./pages/About.tsx";
 import Terms from "./pages/Terms.tsx";
 import BlogPost from "./pages/BlogPost.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Mikey from "./pages/Mikey.tsx";
 
 const queryClient = new QueryClient();
 
