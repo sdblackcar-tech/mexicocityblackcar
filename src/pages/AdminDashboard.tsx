@@ -19,7 +19,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, RefreshCw, Pencil, Trash2, Calendar, DollarSign, Users, Clock } from "lucide-react";
+import { LogOut, RefreshCw, Pencil, Trash2, Calendar, DollarSign, Users, Clock, KeyRound } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Booking = Tables<"booking_requests">;
@@ -44,6 +44,10 @@ export default function AdminDashboard() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Booking>>({});
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showPassword, setShowPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -94,6 +98,23 @@ export default function AdminDashboard() {
     fetchBookings();
   };
 
+  const handleChangePassword = async () => {
+    if (newPassword.length < 6) {
+      setPasswordMsg({ type: "error", text: "Password must be at least 6 characters" });
+      return;
+    }
+    setPasswordLoading(true);
+    setPasswordMsg(null);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPasswordLoading(false);
+    if (error) {
+      setPasswordMsg({ type: "error", text: error.message });
+    } else {
+      setPasswordMsg({ type: "success", text: "Password updated!" });
+      setNewPassword("");
+    }
+  };
+
   if (authLoading || !isAdmin) return null;
 
   const stats = {
@@ -110,6 +131,9 @@ export default function AdminDashboard() {
         <h1 className="font-display text-2xl text-foreground">Booking Dashboard</h1>
         <div className="flex items-center gap-3">
           <span className="text-muted-foreground text-sm">{user?.email}</span>
+          <Button variant="ghost" size="icon" onClick={() => setShowPassword(true)} title="Change password">
+            <KeyRound className="w-4 h-4" />
+          </Button>
           <Button variant="ghost" size="icon" onClick={() => { signOut(); navigate("/admin/login"); }}>
             <LogOut className="w-4 h-4" />
           </Button>
@@ -297,6 +321,35 @@ export default function AdminDashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Change Password Dialog */}
+      <Dialog open={showPassword} onOpenChange={(o) => { if (!o) { setShowPassword(false); setPasswordMsg(null); setNewPassword(""); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Change Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            {passwordMsg && (
+              <div className={`text-sm text-center rounded-md p-2 ${passwordMsg.type === "success" ? "text-emerald-400 bg-emerald-500/10" : "text-destructive bg-destructive/10"}`}>
+                {passwordMsg.text}
+              </div>
+            )}
+            <Input
+              type="password"
+              placeholder="New password (min 6 characters)"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              minLength={6}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowPassword(false); setPasswordMsg(null); setNewPassword(""); }}>Cancel</Button>
+            <Button onClick={handleChangePassword} disabled={passwordLoading}>
+              {passwordLoading ? "Updating…" : "Update Password"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
