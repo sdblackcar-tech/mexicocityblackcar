@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      booking_requests: {
+        Row: {
+          conversation_summary: string | null
+          created_at: string
+          dropoff_location: string | null
+          extra_stops: number | null
+          greeters: number | null
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          hours: number | null
+          id: string
+          lang: string | null
+          miles: number | null
+          pickup_location: string | null
+          quoted_total: number | null
+          requested_date: string | null
+          requested_time: string | null
+          service_type: string
+          status: string
+          vehicle_type: string | null
+        }
+        Insert: {
+          conversation_summary?: string | null
+          created_at?: string
+          dropoff_location?: string | null
+          extra_stops?: number | null
+          greeters?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          hours?: number | null
+          id?: string
+          lang?: string | null
+          miles?: number | null
+          pickup_location?: string | null
+          quoted_total?: number | null
+          requested_date?: string | null
+          requested_time?: string | null
+          service_type?: string
+          status?: string
+          vehicle_type?: string | null
+        }
+        Update: {
+          conversation_summary?: string | null
+          created_at?: string
+          dropoff_location?: string | null
+          extra_stops?: number | null
+          greeters?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          hours?: number | null
+          id?: string
+          lang?: string | null
+          miles?: number | null
+          pickup_location?: string | null
+          quoted_total?: number | null
+          requested_date?: string | null
+          requested_time?: string | null
+          service_type?: string
+          status?: string
+          vehicle_type?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
