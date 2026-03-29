@@ -81,8 +81,8 @@ serve(async (req) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseKey}`,
-            'apikey': supabaseKey,
+            'Authorization': `Bearer ${anonKey}`,
+            'apikey': anonKey,
           },
           body: JSON.stringify(emailPayload),
         }
