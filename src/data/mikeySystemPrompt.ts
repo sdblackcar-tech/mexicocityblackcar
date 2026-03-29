@@ -3,7 +3,6 @@ import { VEHICLES } from './mikeyPricing';
 import { VENUES } from './mikeyVenues';
 
 export const MIKEY_CONFIG = {
-  PROXY_URL: '', // Set to your deployed proxy URL, e.g. 'https://mikey-proxy.up.railway.app'
   COMPANY_NAME: 'Lux Tour Travel',
   COMPANY_PHONE: '+1 858 999 1895',
   COMPANY_WHATSAPP: '+1 858 999 1895',

@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { MIKEY_LANGS, GREETINGS, SUGGESTION_CHIPS, COUNTRY_LANG } from '@/data/mikeyConfig';
 import { getVenuesByType, getVenueByKey, type Venue } from '@/data/mikeyVenues';
 import { VEHICLES, buildQuote, lookupDistance, type Quote } from '@/data/mikeyPricing';
-import { buildSystemPrompt, MIKEY_CONFIG } from '@/data/mikeySystemPrompt';
+import { buildSystemPrompt } from '@/data/mikeySystemPrompt';
+import { supabase } from '@/integrations/supabase/client';
 
 // ─── Types ───
 interface ChatMessage {
@@ -319,41 +320,36 @@ export default function Mikey() {
 
     const newHistory: ConversationMessage[] = [...conversationHistory, { role: 'user', content: msg }];
 
-    // Try proxy first, fall back to local engine
-    if (MIKEY_CONFIG.PROXY_URL) {
-      try {
-        const res = await fetch(MIKEY_CONFIG.PROXY_URL + '/v1/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            system: buildSystemPrompt(lang),
-            max_tokens: 1200,
-            messages: newHistory,
-          }),
-        });
+    // Try edge function first, fall back to local engine
+    try {
+      const { data: fnData, error: fnError } = await supabase.functions.invoke('mikey-chat', {
+        body: {
+          system: buildSystemPrompt(lang),
+          max_tokens: 1200,
+          messages: newHistory,
+        },
+      });
 
-        if (!res.ok) throw new Error(`Proxy ${res.status}`);
-        const data = await res.json();
-        const rawText = data.content?.[0]?.text || data.content || '';
+      if (fnError) throw fnError;
+      const rawText = fnData?.content?.[0]?.text || fnData?.content || '';
 
-        const { text: cleanText, venues, quote, suggestions } = parseSignals(rawText);
+      const { text: cleanText, venues, quote, suggestions } = parseSignals(rawText);
 
-        const assistantMsg: ChatMessage = {
-          id: Date.now().toString(36) + 'a',
-          role: 'assistant',
-          content: cleanText,
-          venues: venues.length > 0 ? venues : undefined,
-          quote: quote || undefined,
-          suggestions: suggestions.length > 0 ? suggestions : (SUGGESTION_CHIPS[lang] || SUGGESTION_CHIPS.en),
-        };
+      const assistantMsg: ChatMessage = {
+        id: Date.now().toString(36) + 'a',
+        role: 'assistant',
+        content: cleanText,
+        venues: venues.length > 0 ? venues : undefined,
+        quote: quote || undefined,
+        suggestions: suggestions.length > 0 ? suggestions : (SUGGESTION_CHIPS[lang] || SUGGESTION_CHIPS.en),
+      };
 
-        setMessages(prev => [...prev, assistantMsg]);
-        setConversationHistory([...newHistory, { role: 'assistant', content: rawText }]);
-        setIsTyping(false);
-        return;
-      } catch (err) {
-        console.warn('Proxy unavailable, using local engine:', err);
-      }
+      setMessages(prev => [...prev, assistantMsg]);
+      setConversationHistory([...newHistory, { role: 'assistant', content: rawText }]);
+      setIsTyping(false);
+      return;
+    } catch (err) {
+      console.warn('Edge function unavailable, using local engine:', err);
     }
 
     // Local fallback
