@@ -321,6 +321,35 @@ export default function AdminDashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Change Password Dialog */}
+      <Dialog open={showPassword} onOpenChange={(o) => { if (!o) { setShowPassword(false); setPasswordMsg(null); setNewPassword(""); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Change Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            {passwordMsg && (
+              <div className={`text-sm text-center rounded-md p-2 ${passwordMsg.type === "success" ? "text-emerald-400 bg-emerald-500/10" : "text-destructive bg-destructive/10"}`}>
+                {passwordMsg.text}
+              </div>
+            )}
+            <Input
+              type="password"
+              placeholder="New password (min 6 characters)"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              minLength={6}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowPassword(false); setPasswordMsg(null); setNewPassword(""); }}>Cancel</Button>
+            <Button onClick={handleChangePassword} disabled={passwordLoading}>
+              {passwordLoading ? "Updating…" : "Update Password"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
