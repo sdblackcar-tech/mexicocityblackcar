@@ -7,6 +7,12 @@ import { buildSystemPrompt } from '@/data/mikeySystemPrompt';
 import { supabase } from '@/integrations/supabase/client';
 
 // ─── Types ───
+interface ClientInfo {
+  name?: string;
+  email?: string;
+  date?: string;
+}
+
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -14,6 +20,7 @@ interface ChatMessage {
   venues?: Venue[];
   quote?: Quote;
   suggestions?: string[];
+  clientInfo?: ClientInfo;
 }
 
 interface ConversationMessage {
@@ -60,10 +67,19 @@ function parseSignals(raw: string) {
     sugMatch[1].split('|').forEach(s => { const t = s.trim(); if (t) suggestions.push(t); });
   }
 
+  let clientInfo: ClientInfo | null = null;
   const clientMatch = text.match(/\[\[CLIENT_INFO:([^\]]+)\]\]/i);
-  if (clientMatch) text = text.replace(clientMatch[0], '').trim();
+  if (clientMatch) {
+    text = text.replace(clientMatch[0], '').trim();
+    const parts = clientMatch[1].split('|');
+    clientInfo = {
+      name: parts[0]?.trim() || undefined,
+      email: parts[1]?.trim() || undefined,
+      date: parts[2]?.trim() || undefined,
+    };
+  }
 
-  return { text, venues, quote, suggestions };
+  return { text, venues, quote, suggestions, clientInfo };
 }
 
 // ─── Markdown renderer ───
@@ -230,13 +246,39 @@ export default function MikeyChatPanel({ open, onClose, startWithVoice = false }
       });
       if (fnError) throw fnError;
       const rawText = fnData?.content?.[0]?.text || fnData?.content || '';
-      const { text: cleanText, venues, quote, suggestions } = parseSignals(rawText);
+      const { text: cleanText, venues, quote, suggestions, clientInfo } = parseSignals(rawText);
       setMessages(prev => [...prev, {
         id: Date.now().toString(36) + 'a', role: 'assistant', content: cleanText,
         venues: venues.length > 0 ? venues : undefined, quote: quote || undefined,
         suggestions: suggestions.length > 0 ? suggestions : (SUGGESTION_CHIPS[lang] || SUGGESTION_CHIPS.en),
+        clientInfo: clientInfo || undefined,
       }]);
       setConversationHistory([...newHistory, { role: 'assistant', content: rawText }]);
+
+      // Auto-save booking request when we have a quote + client info
+      if (quote || clientInfo) {
+        const summary = newHistory.map(m => `${m.role}: ${m.content}`).join('\n').slice(0, 2000);
+        supabase.functions.invoke('notify-admin-booking', {
+          body: {
+            guest_name: clientInfo?.name,
+            guest_email: clientInfo?.email,
+            requested_date: clientInfo?.date,
+            service_type: quote?.params.serviceType || 'inquiry',
+            vehicle_type: quote?.vehicle,
+            hours: quote?.params.hours,
+            miles: quote?.params.miles,
+            greeters: quote?.params.greeters,
+            extra_stops: quote?.params.extraStops,
+            quoted_total: quote?.total,
+            conversation_summary: summary,
+            lang,
+          },
+        }).then(res => {
+          if (res.error) console.warn('Booking save failed:', res.error);
+          else console.log('Booking request saved:', res.data);
+        });
+      }
+
       setIsTyping(false);
       return;
     } catch (err) {
