@@ -5,7 +5,7 @@ import {
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "Lux Tour Travel"
-const ADMIN_EMAIL = "info@luxtourtravel.com"
+const ADMIN_EMAIL = "sdblackcar@gmail.com"
 
 interface AdminBookingNotificationProps {
   guest_name?: string
