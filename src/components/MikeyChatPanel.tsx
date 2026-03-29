@@ -246,13 +246,39 @@ export default function MikeyChatPanel({ open, onClose, startWithVoice = false }
       });
       if (fnError) throw fnError;
       const rawText = fnData?.content?.[0]?.text || fnData?.content || '';
-      const { text: cleanText, venues, quote, suggestions } = parseSignals(rawText);
+      const { text: cleanText, venues, quote, suggestions, clientInfo } = parseSignals(rawText);
       setMessages(prev => [...prev, {
         id: Date.now().toString(36) + 'a', role: 'assistant', content: cleanText,
         venues: venues.length > 0 ? venues : undefined, quote: quote || undefined,
         suggestions: suggestions.length > 0 ? suggestions : (SUGGESTION_CHIPS[lang] || SUGGESTION_CHIPS.en),
+        clientInfo: clientInfo || undefined,
       }]);
       setConversationHistory([...newHistory, { role: 'assistant', content: rawText }]);
+
+      // Auto-save booking request when we have a quote + client info
+      if (quote || clientInfo) {
+        const summary = newHistory.map(m => `${m.role}: ${m.content}`).join('\n').slice(0, 2000);
+        supabase.functions.invoke('notify-admin-booking', {
+          body: {
+            guest_name: clientInfo?.name,
+            guest_email: clientInfo?.email,
+            requested_date: clientInfo?.date,
+            service_type: quote?.params.serviceType || 'inquiry',
+            vehicle_type: quote?.vehicle,
+            hours: quote?.params.hours,
+            miles: quote?.params.miles,
+            greeters: quote?.params.greeters,
+            extra_stops: quote?.params.extraStops,
+            quoted_total: quote?.total,
+            conversation_summary: summary,
+            lang,
+          },
+        }).then(res => {
+          if (res.error) console.warn('Booking save failed:', res.error);
+          else console.log('Booking request saved:', res.data);
+        });
+      }
+
       setIsTyping(false);
       return;
     } catch (err) {
