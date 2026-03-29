@@ -31,6 +31,7 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // 1. Save to database
@@ -58,25 +59,43 @@ serve(async (req) => {
     console.log(`Booking request saved: ${inserted.id}`);
 
     // 2. Send admin notification email via transactional email system
-    const { error: emailError } = await supabase.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'admin-booking-notification',
-        idempotencyKey: `admin-booking-${inserted.id}`,
-        templateData: {
-          guest_name, guest_email, guest_phone,
-          service_type, vehicle_type,
-          pickup_location, dropoff_location,
-          requested_date, requested_time,
-          hours, miles, quoted_total,
-          conversation_summary: conversation_summary?.slice(0, 800),
-        },
+    // Use fetch with explicit auth headers (supabase.functions.invoke doesn't
+    // reliably pass service-role credentials between edge functions).
+    const emailPayload = {
+      templateName: 'admin-booking-notification',
+      idempotencyKey: `admin-booking-${inserted.id}`,
+      templateData: {
+        guest_name, guest_email, guest_phone,
+        service_type, vehicle_type,
+        pickup_location, dropoff_location,
+        requested_date, requested_time,
+        hours, miles, quoted_total,
+        conversation_summary: conversation_summary?.slice(0, 800),
       },
-    });
+    };
 
-    if (emailError) {
+    try {
+      const emailRes = await fetch(
+        `${supabaseUrl}/functions/v1/send-transactional-email`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${anonKey}`,
+            'apikey': anonKey,
+          },
+          body: JSON.stringify(emailPayload),
+        }
+      );
+
+      if (!emailRes.ok) {
+        const errBody = await emailRes.text();
+        console.warn('Admin email notification failed (non-fatal):', emailRes.status, errBody);
+      } else {
+        console.log('Admin email notification queued');
+      }
+    } catch (emailError) {
       console.warn('Admin email notification failed (non-fatal):', emailError);
-    } else {
-      console.log('Admin email notification queued');
     }
 
     return new Response(
