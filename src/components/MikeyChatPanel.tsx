@@ -7,6 +7,12 @@ import { buildSystemPrompt } from '@/data/mikeySystemPrompt';
 import { supabase } from '@/integrations/supabase/client';
 
 // ─── Types ───
+interface ClientInfo {
+  name?: string;
+  email?: string;
+  date?: string;
+}
+
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -14,6 +20,7 @@ interface ChatMessage {
   venues?: Venue[];
   quote?: Quote;
   suggestions?: string[];
+  clientInfo?: ClientInfo;
 }
 
 interface ConversationMessage {
