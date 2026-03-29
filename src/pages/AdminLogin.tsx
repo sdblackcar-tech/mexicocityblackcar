@@ -29,7 +29,7 @@ export default function AdminLogin() {
       if (error) {
         setError(error.message);
       } else {
-        setSuccess("Account created! You can now sign in. (An admin must assign your role before you can access the dashboard.)");
+        setSuccess("Account created! You can now sign in.");
         setMode("login");
       }
       return;
@@ -90,71 +90,11 @@ export default function AdminLogin() {
             </Button>
             <p className="text-center text-sm text-muted-foreground">
               {mode === "login" ? (
-                <>No account? <button type="button" className="text-primary hover:underline" onClick={() => { setMode("signup"); setError(""); setSuccess(""); }}>Create one</button></>
+                <>No account?{" "}<button type="button" className="text-primary hover:underline" onClick={() => { setMode("signup"); setError(""); setSuccess(""); }}>Create one</button></>
               ) : (
-                <>Have an account? <button type="button" className="text-primary hover:underline" onClick={() => { setMode("login"); setError(""); setSuccess(""); }}>Sign in</button></>
+                <>Have an account?{" "}<button type="button" className="text-primary hover:underline" onClick={() => { setMode("login"); setError(""); setSuccess(""); }}>Sign in</button></>
               )}
             </p>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    const { error } = await signIn(email, password);
-    setLoading(false);
-    if (error) {
-      setError("Invalid credentials");
-    } else {
-      navigate("/admin");
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-border/50">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Lock className="w-6 h-6 text-primary" />
-          </div>
-          <CardTitle className="font-display text-2xl text-foreground">Admin Access</CardTitle>
-          <p className="text-muted-foreground text-sm">Sign in to manage booking requests</p>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="text-destructive text-sm text-center bg-destructive/10 rounded-md p-2">
-                {error}
-              </div>
-            )}
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in…" : "Sign In"}
-            </Button>
           </form>
         </CardContent>
       </Card>
