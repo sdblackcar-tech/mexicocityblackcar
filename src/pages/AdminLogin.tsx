@@ -13,7 +13,7 @@ export default function AdminLogin() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const mode = "login" as const;
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -88,13 +88,6 @@ export default function AdminLogin() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Please wait…" : mode === "login" ? "Sign In" : "Create Account"}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              {mode === "login" ? (
-                <>No account?{" "}<button type="button" className="text-primary hover:underline" onClick={() => { setMode("signup"); setError(""); setSuccess(""); }}>Create one</button></>
-              ) : (
-                <>Have an account?{" "}<button type="button" className="text-primary hover:underline" onClick={() => { setMode("login"); setError(""); setSuccess(""); }}>Sign in</button></>
-              )}
-            </p>
           </form>
         </CardContent>
       </Card>
