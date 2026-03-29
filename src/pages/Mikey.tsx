@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { MIKEY_LANGS, GREETINGS, SUGGESTION_CHIPS, COUNTRY_LANG } from '@/data/mikeyConfig';
 import { getVenuesByType, getVenueByKey, type Venue } from '@/data/mikeyVenues';
 import { VEHICLES, buildQuote, lookupDistance, type Quote } from '@/data/mikeyPricing';
-import { buildSystemPrompt, MIKEY_CONFIG } from '@/data/mikeySystemPrompt';
+import { buildSystemPrompt } from '@/data/mikeySystemPrompt';
+import { supabase } from '@/integrations/supabase/client';
 
 // ─── Types ───
 interface ChatMessage {
