@@ -67,10 +67,19 @@ function parseSignals(raw: string) {
     sugMatch[1].split('|').forEach(s => { const t = s.trim(); if (t) suggestions.push(t); });
   }
 
+  let clientInfo: ClientInfo | null = null;
   const clientMatch = text.match(/\[\[CLIENT_INFO:([^\]]+)\]\]/i);
-  if (clientMatch) text = text.replace(clientMatch[0], '').trim();
+  if (clientMatch) {
+    text = text.replace(clientMatch[0], '').trim();
+    const parts = clientMatch[1].split('|');
+    clientInfo = {
+      name: parts[0]?.trim() || undefined,
+      email: parts[1]?.trim() || undefined,
+      date: parts[2]?.trim() || undefined,
+    };
+  }
 
-  return { text, venues, quote, suggestions };
+  return { text, venues, quote, suggestions, clientInfo };
 }
 
 // ─── Markdown renderer ───
