@@ -21,7 +21,7 @@ const Index = () => {
   const ctaButtons = [
     { label: t.hero.ctaTalk, icon: MessageCircle, action: () => openMikey(false) },
     { label: t.hero.ctaPush, icon: Mic, action: () => openMikey(true) },
-    { label: t.hero.ctaRequest, icon: CalendarCheck, href: "#request-service" },
+    { label: t.hero.ctaRequest, icon: CalendarCheck, action: () => openMikey(false) },
     { label: t.hero.ctaBlog, icon: BookOpen, href: "#blog" },
   ];
 
